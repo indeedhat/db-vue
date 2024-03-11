@@ -34,6 +34,9 @@ func main() {
 			app,
 			app.adapter,
 		},
+		EnumBind: []interface{}{
+			ConnectionTypeEnum,
+		},
 	})
 
 	if err != nil {

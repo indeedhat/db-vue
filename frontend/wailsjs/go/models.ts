@@ -63,3 +63,12 @@ export namespace database {
 
 }
 
+export namespace main {
+	
+	export enum ConnectionType {
+	    MySQL = "MySQL",
+	    Postgres = "Postgres",
+	}
+
+}
+

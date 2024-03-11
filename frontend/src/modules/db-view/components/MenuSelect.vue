@@ -19,19 +19,13 @@ import { ref, onMounted } from 'vue'
 
 import MenuItem from '@/modules/db-view/components/MenuItem.vue'
 
-const props = defineProps({
-    items: {
-        type: Array as PropType<string[]>,
-        required: true
-    },
-    active: {
-        type: String,
-        default: ''
-    },
-    onSelect: Function
-})
+const props = defineProps<{
+    items: string[]
+    active?: string
+    onSelect?: (e: string) => void
+}>()
 
-const initialSelect = props.items.indexOf(props.active)
+const initialSelect = props.items.indexOf(props.active ?? '')
 const selected: Ref<number> = ref(initialSelect !== -1 ? initialSelect : 0)
 const select = (i: number) => {
     selected.value = i

@@ -8,13 +8,10 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-const props = defineProps({
-    type: {
-        type: String,
-        default: 'notice'
-    },
-    title: String
-})
+const props = defineProps<{
+    type?: string
+    title?: string
+}>()
 
 const noticeClasses = computed(() => {
     switch (props.type) {

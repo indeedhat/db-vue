@@ -40,11 +40,13 @@ func (a *PostgresAdapter) TruncateTable(table string) error {
 }
 
 // NewPostgresAdapter sets up a new connection to the mysql database
-func NewPostgresAdapter(ctx context.Context) (*PostgresAdapter, error) {
-	db, err := sql.Open(
-		"postgres",
-		"host=127.0.0.1 port=5432 user=user password=password dbname=my_database sslmode=disable",
-	)
+func NewPostgresAdapter(ctx context.Context, details database.ConnectionDetails) (*PostgresAdapter, error) {
+	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s password=%s sslmode=disable",
+		details.Host,
+		details.Port,
+		details.User,
+		details.Pass,
+	))
 	if err != nil {
 		return nil, err
 	}

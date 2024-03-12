@@ -1,5 +1,9 @@
 export namespace database {
 	
+	export enum ConnectionType {
+	    MySQL = "MySQL",
+	    Postgres = "Postgres",
+	}
 	export class ColumnType {
 	    name: string;
 	    nullable: boolean;
@@ -22,6 +26,28 @@ export namespace database {
 	        this.precison = source["precison"];
 	        this.scale = source["scale"];
 	        this.scan_type = source["scan_type"];
+	    }
+	}
+	export class ConnectionDetails {
+	    type: ConnectionType;
+	    name: string;
+	    host: string;
+	    port: number;
+	    user: string;
+	    pass: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ConnectionDetails(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.type = source["type"];
+	        this.name = source["name"];
+	        this.host = source["host"];
+	        this.port = source["port"];
+	        this.user = source["user"];
+	        this.pass = source["pass"];
 	    }
 	}
 	export class Results {
@@ -59,15 +85,6 @@ export namespace database {
 		    }
 		    return a;
 		}
-	}
-
-}
-
-export namespace main {
-	
-	export enum ConnectionType {
-	    MySQL = "MySQL",
-	    Postgres = "Postgres",
 	}
 
 }

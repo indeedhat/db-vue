@@ -1,5 +1,5 @@
 import { useToast } from "../toast/useToast";
-import * as adapter from '../../../wailsjs/go/main/Adapter'
+import * as adapter from '../../../wailsjs/go/main/App'
 import { database } from '../../../wailsjs/go/models'
 
 export interface DBInfo {
@@ -92,7 +92,6 @@ const useDatabase = (): DatabaseAdapter  => {
     }
 
     const e = (value: any, type: database.ColumnType): string => {
-        console.log(type.scan_type)
         switch (type.scan_type) {
             case 'NullString':
                 return value.String

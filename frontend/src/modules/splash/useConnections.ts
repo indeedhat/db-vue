@@ -1,29 +1,24 @@
 import { defineStore } from 'pinia'
-import { main } from "../../../wailsjs/go/models"
-
-export interface Connection {
-    type: main.ConnectionType
-    name: string
-    host: string
-    port: string
-    user: string
-    pass: string
-}
+import { database } from "../../../wailsjs/go/models"
 
 interface State {
-    connections: { [key: string]: Connection }
+    connections: { [key: string]: database.ConnectionDetails }
 }
 
-export const useStore = defineStore('db-view', {
+export const useConnectionsStore = defineStore('connections', {
     state: (): State => ({
         connections: {}
     }),
+persist: true,
     actions: {
-        addConnection(con: Connection) {
+        addConnection(con: database.ConnectionDetails) {
             this.connections[con.name] = con
         },
-        removeConnection(con: Connection) {
+        removeConnection(con: database.ConnectionDetails) {
             delete this.connections[con.name]
-        }
+        },
+        hasConnection(name: string) {
+            return "undefined" !== typeof this.connections[name]
+        },
     }
 })

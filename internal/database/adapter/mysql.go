@@ -40,8 +40,13 @@ func (a *MySQLAdapter) TruncateTable(table string) error {
 }
 
 // NewMySQLAdapter sets up a new connection to the mysql database
-func NewMySQLAdapter(ctx context.Context) (*MySQLAdapter, error) {
-	db, err := sql.Open("mysql", "user:password@/my_database")
+func NewMySQLAdapter(ctx context.Context, details database.ConnectionDetails) (*MySQLAdapter, error) {
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/",
+		details.User,
+		details.Pass,
+		details.Host,
+		details.Port,
+	))
 	if err != nil {
 		return nil, err
 	}

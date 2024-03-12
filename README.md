@@ -18,8 +18,11 @@ an incredibly simplistic tool to run queries agains relational databases.
 - [x] schema tab sets
 - [x] persist store
 
-- [ ] accept connection details
-- [ ] save connections
+- [x] accept connection details
+- [x] save connections
+- [ ] edit/delete connections
+- [ ] close connection
+    - possible could instead allow for multiple connections to be open at a time
 
 - [ ] add new rows
 - [ ] view row as json

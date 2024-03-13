@@ -9,7 +9,7 @@ export const useConnectionsStore = defineStore('connections', {
     state: (): State => ({
         connections: {}
     }),
-persist: true,
+    persist: true,
     actions: {
         addConnection(con: database.ConnectionDetails) {
             this.connections[con.name] = con

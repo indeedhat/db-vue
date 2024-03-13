@@ -39,6 +39,7 @@ import { useRouter } from 'vue-router'
 import { Connect } from '../../../wailsjs/go/main/App'
 import { database } from '../../../wailsjs/go/models'
 import { useConnectionsStore } from './useConnections'
+import { useGlobalStore } from '../useGlobalStore'
 import { useToast } from '../toast/useToast'
 
 import ConnectionWidget from './components/ConnectionWidget.vue'
@@ -58,6 +59,7 @@ const formData = ref({
     pass: ''
 })
 const store = useConnectionsStore()
+const globalStore = useGlobalStore()
 
 const handleSubmit = () => {
     if (!formData.value.type
@@ -110,6 +112,7 @@ const handleConnect = async (details: database.ConnectionDetails): Promise<void>
     //        ? database.ConnectionType.MySQL 
     //        : database.ConnectionType.Postgres, details.type)
     await Connect(details)
+    globalStore.setConnection(details)
     router.push("/db")
 }
 

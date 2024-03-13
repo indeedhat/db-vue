@@ -4,21 +4,24 @@ import { type DBInfo } from './useDatabase'
 
 interface State {
     activeSchema: string
-    schemaTabs: { [key: string]: TabState; }
+    connections: ConnectionsState
     info: DBInfo,
 }
-
-type TabState = { [key: string]: ConsoleState }
-
+interface ConnectionsState { [key: string]: SchemasState }
+interface SchemasState { [key: string]: TabsState }
+interface TabsState { [key: string]: ConsoleState }
 export interface ConsoleState {
     content: string
     results: database.Results|null
 }
 
-export const useStore = defineStore('db-view', {
+let active: string = ""
+const actualUseStore = defineStore('db-view', {
     state: (): State => ({
         activeSchema: "",
-        schemaTabs: {},
+        connections: {
+            [active]: {}
+        },
         info: {
             schemas:[],
             tables: []
@@ -26,40 +29,42 @@ export const useStore = defineStore('db-view', {
     }),
     persist: true,
     getters: {
-        activeSchemaState(state: State): TabState|undefined {
-            return state.schemaTabs[state.activeSchema]
+        activeSchemaState(state: State): TabsState|undefined {
+            return state.connections[active][state.activeSchema]
         },
         activeTabCount(state: State): number {
-            const schemaState = state.schemaTabs[state.activeSchema]
-            if (!schemaState) {
+            if (!this.activeSchemaState) {
                 return 0
             }
 
-            return Object.keys(schemaState).length
+            return Object.keys(this.activeSchemaState).length
         }
     },
     actions: {
         setActive(schema: string) {
             this.activeSchema = schema
-            if (!this.schemaTabs[this.activeSchema]) {
-                this.schemaTabs[this.activeSchema] = {}
+            if (!this.connections[schema]) {
+                this.connections[schema] = {}
+            }
+            if (!this.activeSchemaState) {
+                this.connections[active][this.activeSchema] = {}
             }
         },
-        addTab(table: string) {
-            if (!this.schemaTabs[this.activeSchema][table]) {
-                this.schemaTabs[this.activeSchema][table] = {
+        addTab(tab: string) {
+            if (!this.activeSchemaState![tab]) {
+                this.connections[active][this.activeSchema][tab] = {
                     content: "",
                     results: null
                 }
             }
         },
-        removeTab(table: string) {
-            if (!this.schemaTabs[this.activeSchema]) {
+        removeTab(tab: string) {
+            if (!this.activeSchemaState![tab]) {
                 return
             }
 
-            if (this.schemaTabs[this.activeSchema][table]) {
-                delete this.schemaTabs[this.activeSchema][table]
+            if (this.activeSchemaState![tab]) {
+                delete this.connections[active][this.activeSchema][tab]
             }
         },
         setInfo(info: DBInfo) {
@@ -67,3 +72,8 @@ export const useStore = defineStore('db-view', {
         }
     }
 })
+
+export const useStore = (activeConnection: string) => {
+    active = activeConnection
+    return actualUseStore()
+}

@@ -7,7 +7,7 @@
             theme="nord_dark"
             style="height: 300px;font-size: 20px" 
         />
-        <button @click="runQuery">Run</button>
+        <std-button @click="runQuery">Run</std-button>
     </section>
     <section id="results" class="flex overflow-auto m-5 pb-1">
         <div v-if="state.results?.error">{{ state.results.error }}</div>
@@ -46,6 +46,7 @@ import { VAceEditor } from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-mysql'
 import 'ace-builds/src-noconflict/theme-nord_dark'
 
+import StdButton from '@/components/Button.vue'
 import BaseTable from '@/components/table/BaseTable.vue'
 import TableBody from '@/components/table/TableBody.vue'
 import HeadderCell from '@/components/table/HeadderCell.vue'

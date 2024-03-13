@@ -16,7 +16,7 @@
         </aside>
         <main class="flex-grow min-h-0 max-h-full overflow-y-auto">
             <tab-container>
-                <tab v-for="(consoleState, tab) in store.activeSchemaState" :key="tab" :name="tab" :onRemove="() => removeTab(tab+'')">
+                <tab v-for="(consoleState, tname) in store.activeSchemaState" :key="tname" :name="<string>tname" :onRemove="() => removeTab(<string>tname)">
                     <console-page :state="consoleState"/>
                 </tab>
             </tab-container>
@@ -30,6 +30,7 @@ import { ref, onMounted } from 'vue'
 import { database } from '../../../wailsjs/go/models'
 import { useDatabase, type DBInfo } from './useDatabase'
 import { useStore } from './useStore'
+import { useGlobalStore } from '../useGlobalStore'
 
 import ConsolePage from '@/modules/db-view/components/ConsolePage.vue'
 import MenuSelect from '@/modules/db-view/components/MenuSelect.vue'
@@ -39,7 +40,8 @@ import TabContainer from '@/components/tabs/TabContainer.vue'
 import Notice from '@/components/Notice.vue'
 
 const adapter = useDatabase()
-const store = useStore()
+const globalStore = useGlobalStore()
+const store = useStore(globalStore.connection!.name)
 
 const removeTab = (tab: string): void => store.removeTab(tab)
 const openTab = (tab: string): void => store.addTab(tab)

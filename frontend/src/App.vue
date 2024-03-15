@@ -6,4 +6,5 @@
 </template>
 
 <script lang="ts" setup>
+import ToastContainer from '@/modules/toast/components/ToastContainer.vue'
 </script>

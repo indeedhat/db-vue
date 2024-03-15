@@ -6,10 +6,6 @@ export function Connect(arg1) {
   return window['go']['main']['App']['Connect'](arg1);
 }
 
-export function DropTable(arg1) {
-  return window['go']['main']['App']['DropTable'](arg1);
-}
-
 export function ListSchemas() {
   return window['go']['main']['App']['ListSchemas']();
 }
@@ -22,12 +18,16 @@ export function Query(arg1) {
   return window['go']['main']['App']['Query'](arg1);
 }
 
+export function RunTableCommand(arg1, arg2) {
+  return window['go']['main']['App']['RunTableCommand'](arg1, arg2);
+}
+
 export function SetContext(arg1) {
   return window['go']['main']['App']['SetContext'](arg1);
 }
 
-export function TruncateTable(arg1) {
-  return window['go']['main']['App']['TruncateTable'](arg1);
+export function TableCommands() {
+  return window['go']['main']['App']['TableCommands']();
 }
 
 export function Use(arg1) {

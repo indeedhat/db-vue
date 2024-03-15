@@ -41,6 +41,8 @@ import { ref } from 'vue'
 import { database } from '../../../../wailsjs/go/models'
 import { useDatabase, type DBInfo } from '../useDatabase'
 import { type ConsoleState } from '../useStore'
+import { useStore } from '../useStore'
+import { useGlobalStore } from '../../useGlobalStore'
 
 import { VAceEditor } from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-mysql'
@@ -56,12 +58,18 @@ const props = defineProps<{
     state: ConsoleState
 }>()
 
+const globalStore = useGlobalStore()
+const store = useStore(globalStore.connection!.name)
 const adapter = useDatabase()
 
 const editorInit = () => {}
 
 const runQuery = async () => {
     props.state.results = await adapter.query(props.state.content)
+    const info = await adapter.refreshInfo()
+    if (info) {
+        store.setInfo(info!)
+    }
 }
 </script>
 

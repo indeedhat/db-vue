@@ -9,34 +9,16 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const (
+	PostgresRpcTruncate        = "Truncate Table"
+	PostgresRpcTruncateCascade = "Truncate Table (Cascade)"
+	PostgresRpcDrop            = "Drop Table"
+)
+
 type PostgresAdapter struct {
 	db     *sql.DB
 	dbName string
 	ctx    context.Context
-}
-
-// DropTable implements database.Adapter.
-func (a *PostgresAdapter) DropTable(table string) error {
-	c, err := a.con()
-	if err != nil {
-		return err
-	}
-	defer c.Close()
-
-	_, err = c.ExecContext(a.ctx, fmt.Sprintf("DROP `%s`", table))
-	return err
-}
-
-// TruncateTable implements database.Adapter.
-func (a *PostgresAdapter) TruncateTable(table string) error {
-	c, err := a.con()
-	if err != nil {
-		return err
-	}
-	defer c.Close()
-
-	_, err = c.ExecContext(a.ctx, fmt.Sprintf("TRUNCATE `%s`", table))
-	return err
 }
 
 // NewPostgresAdapter sets up a new connection to the mysql database
@@ -52,6 +34,29 @@ func NewPostgresAdapter(ctx context.Context, details database.ConnectionDetails)
 	}
 
 	return &PostgresAdapter{db: db, ctx: ctx}, nil
+}
+
+// RunTableCommand implements database.Adapter.
+func (a *PostgresAdapter) RunTableCommand(table, command string) error {
+	switch command {
+	case PostgresRpcTruncate:
+		return a.exec(fmt.Sprintf("TRUNCATE `%s`", table))
+	case PostgresRpcTruncateCascade:
+		return a.exec(fmt.Sprintf("TRUNCATE CASCADE`%s`", table))
+	case PostgresRpcDrop:
+		return a.exec(fmt.Sprintf("DROP TABLE `%s`", table))
+	}
+
+	return fmt.Errorf("Invalid table command '%s'", command)
+}
+
+// TableCommands implements database.Adapter.
+func (*PostgresAdapter) TableCommands() []string {
+	return []string{
+		PostgresRpcDrop,
+		PostgresRpcTruncate,
+		PostgresRpcTruncateCascade,
+	}
 }
 
 // SetContext sets the context instance that will be used for all queries
@@ -143,4 +148,16 @@ func (a *PostgresAdapter) con() (*sql.Conn, error) {
 	}
 
 	return c, nil
+}
+
+// exec executes a sql query that expects no results
+func (a *PostgresAdapter) exec(query string) error {
+	c, err := a.con()
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+
+	_, err = c.ExecContext(a.ctx, query)
+	return err
 }

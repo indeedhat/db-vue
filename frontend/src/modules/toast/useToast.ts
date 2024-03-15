@@ -29,6 +29,7 @@ export const useToast = (): Toast => {
         createNotification('danger', body, title, timeout)
 
     const createNotification = (type: string, body: string, title: string, timeout: number): void => {
+        console.log({ type, body, title, timeout })
         const notification = { id: +new Date(), body, type, title }
         notifications.push(notification)
         setTimeout(() => close(notification), timeout)

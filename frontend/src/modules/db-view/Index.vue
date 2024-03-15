@@ -11,13 +11,27 @@
                 />
             </ul>
             <ul v-if="store.info.tables.length" class="flex-grow overflow-auto">
-                <menu-item  v-for="table in [...store.info.tables].sort()" :key="table" @click="openTab(table)">
+                <menu-item  v-for="table in [...store.info.tables].sort()" 
+                    :key="table" 
+                    @click.left="openTab(table)"
+                    @click.right.prevent="(e) => openContext(e, table)"
+                >
                     {{ table }}
                 </menu-item>
             </ul>
             <div v-else>No Tables</div>
         </aside>
-        <main class="flex-grow min-h-0 max-h-full overflow-y-auto">
+        <main class="relative flex-grow min-h-0 max-h-full overflow-y-auto">
+            <context-menu ref="contextMenu">
+                <context-item @click="openTab(contextTable)">Open</context-item>
+                <context-seperator />
+                <context-item v-for="command in tableCommands"
+                    :key="command"
+                    @click="() => runTableCommand(command)"
+                >
+                    {{ command }}
+                </context-item>
+            </context-menu>
             <tab-container ref="tabs">
                 <tab v-for="(consoleState, tname) in store.activeSchemaState" 
                     :key="tname" 
@@ -39,6 +53,9 @@ import { useDatabase, type DBInfo } from './useDatabase'
 import { useStore } from './useStore'
 import { useGlobalStore } from '../useGlobalStore'
 
+import ContextMenu, { type ContextMenuType } from '@/components/context-menu/ContextMenu.vue'
+import ContextItem from '@/components/context-menu/ContextItem.vue'
+import ContextSeperator from '@/components/context-menu/ContextSeperator.vue'
 import ConsolePage from '@/modules/db-view/components/ConsolePage.vue'
 import MenuSelect from '@/modules/db-view/components/MenuSelect.vue'
 import MenuItem from '@/modules/db-view/components/MenuItem.vue'
@@ -51,9 +68,26 @@ const globalStore = useGlobalStore()
 const store = useStore(globalStore.connection!.name)
 
 const tabs = ref<TabContainerModel>()
+const tableCommands = ref<string[]>([])
+const contextTable = ref<string>("")
+const contextMenu = ref<ContextMenuType>()
 
+const openContext = (e: MouseEvent, table: string) => {
+    contextTable.value = table
+    contextMenu.value?.open(e.screenX, e.screenY)
+}
+const runTableCommand = async (command: string) => {
+    contextMenu.value?.close()
+
+    await adapter.runTableCommand(contextTable.value, command)
+    const info = await adapter.refreshInfo()
+    if (info) {
+        store.setInfo(info!)
+    }
+}
 const removeTab = (tab: string): void => store.removeTab(tab)
 const openTab = (tab: string): void => {
+    contextMenu.value?.close()
     if (!store.hasTab(tab)) {
         store.addTab(tab)
     }
@@ -83,6 +117,8 @@ onMounted(async (): Promise<any> => {
     if (inf) {
         store.setInfo(inf!)
     }
+
+    tableCommands.value = await adapter.tableCommands()
 })
 </script>
 

@@ -55,9 +55,14 @@ func (a *App) Connect(details database.ConnectionDetails) error {
 	return err
 }
 
-// DropTable implements database.App.
-func (a *App) DropTable(table string) error {
-	return a.adapter.DropTable(table)
+// RunTableCommand implements database.Adapter.
+func (a *App) RunTableCommand(table string, command string) error {
+	return a.adapter.RunTableCommand(table, command)
+}
+
+// TableCommands implements database.Adapter.
+func (a *App) TableCommands() []string {
+	return a.adapter.TableCommands()
 }
 
 // ListSchemas implements database.App.
@@ -80,11 +85,6 @@ func (a *App) SetContext(ctx context.Context) {
 	if a.adapter != nil {
 		a.adapter.SetContext(ctx)
 	}
-}
-
-// TruncateTable implements database.App.
-func (a *App) TruncateTable(table string) error {
-	return a.adapter.TruncateTable(table)
 }
 
 // Use implements database.App.

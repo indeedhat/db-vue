@@ -10,9 +10,10 @@ export interface DBInfo {
 interface DatabaseAdapter {
     listSchemas: () => Promise<string[]>
     useSchema: (schema: string) => Promise<DBInfo|null>
+    refreshInfo: () => Promise<DBInfo|null>
     query: (query: string) => Promise<database.Results>
-    truncateTable: (table: string) => Promise<DBInfo|null>
-    dropTable: (table: string) => Promise<DBInfo|null>
+    tableCommands: () => Promise<string[]>
+    runTableCommand: (table: string, command: string) => Promise<void>
     e: (value: any, type: database.ColumnType) => string
 }
 
@@ -30,11 +31,11 @@ const useDatabase = (): DatabaseAdapter  => {
 
     const useSchema = async (schema: string): Promise<DBInfo|null> => {
         try {
-            const info: DBInfo = {schemas: [], tables: []}
-
             await adapter.Use(schema)
-            info.tables = await adapter.ListTables()
-            info.schemas = await adapter.ListSchemas()
+            const info = refreshInfo()
+            if (!info) {
+                throw ""
+            }
 
             toast.success(`Switched to ${schema}`)
             return info
@@ -45,49 +46,40 @@ const useDatabase = (): DatabaseAdapter  => {
         return null
     }
 
+    const refreshInfo = async (): Promise<DBInfo|null> => {
+        try {
+            const info: DBInfo = {
+                schemas: await adapter.ListSchemas(), 
+                tables: await adapter.ListTables()
+            }
+
+            return info
+        } catch {
+            return null
+        }
+    }
+
     const query = async (query: string): Promise<database.Results> => {
         const r = await adapter.Query(query)
         return r
     }
 
-    const truncateTable = async (table: string): Promise<DBInfo|null> => {
+    const tableCommands = async (): Promise<string[]> =>  {
         try {
-            await adapter.TruncateTable(table)
-            toast.error(`Truncated table ${table}`)
-
-            try {
-                const info: DBInfo = {schemas: [], tables: []}
-                info.tables = await adapter.ListTables()
-                info.schemas = await adapter.ListSchemas()
-                return info
-            } catch {
-                return null
-            }
+            return await adapter.TableCommands()
         } catch (e) {
-            toast.error(`Failed to truncate table ${table}<br />Error: ${e}`)
+            toast.error(`failed to list table commands`)
+            return []
         }
-
-        return null
     }
 
-    const dropTable = async (table: string): Promise<DBInfo|null> => {
+    const runTableCommand = async (table: string, command: string): Promise<void> =>  {
         try {
-            await adapter.DropTable(table)
-            toast.error(`Dropped table ${table}`)
-
-            try {
-                const info: DBInfo = {schemas: [], tables: []}
-                info.tables = await adapter.ListTables()
-                info.schemas = await adapter.ListSchemas()
-                return info
-            } catch {
-                return null
-            }
+            await adapter.RunTableCommand(table, command)
+            toast.success(`${command}: success`)
         } catch (e) {
-            toast.error(`Failed to drop table ${table}<br />Error: ${e}`)
+            toast.error(`${command}: failed\n${e}`)
         }
-
-        return null
     }
 
     const e = (value: any, type: database.ColumnType): string => {
@@ -103,8 +95,9 @@ const useDatabase = (): DatabaseAdapter  => {
         listSchemas,
         useSchema,
         query,
-        truncateTable,
-        dropTable,
+        tableCommands,
+        runTableCommand,
+        refreshInfo,
         e
     }
 };

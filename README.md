@@ -10,9 +10,9 @@ an incredibly simplistic tool to run queries agains relational databases.
 - [x] list databases
 - [x] run queries
 - [x] view results
-- [ ] truncate table
+- [x] truncate table
     - backend done
-- [ ] drop table
+- [x] drop table
 
 - [x] table tabs
 - [x] schema tab sets
@@ -35,3 +35,7 @@ an incredibly simplistic tool to run queries agains relational databases.
 
 - [ ] intelisense on query input 
     - need to look into if ace provides a way to do this
+
+## Known issues
+- [ ] there is no feedback when running a query that does not have results (such as create table)
+- [ ] table context menu does not close when clicking off it

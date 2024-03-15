@@ -9,34 +9,15 @@ import (
 	"github.com/indeedhat/db-vue/internal/database"
 )
 
+const (
+	MySQLRpcTruncate = "Truncate Table"
+	MySQLRpcDrop     = "Drop Table"
+)
+
 type MySQLAdapter struct {
 	db     *sql.DB
 	dbName string
 	ctx    context.Context
-}
-
-// DropTable implements database.Adapter.
-func (a *MySQLAdapter) DropTable(table string) error {
-	c, err := a.con()
-	if err != nil {
-		return err
-	}
-	defer c.Close()
-
-	_, err = c.ExecContext(a.ctx, fmt.Sprintf("DROP `%s`", table))
-	return err
-}
-
-// TruncateTable implements database.Adapter.
-func (a *MySQLAdapter) TruncateTable(table string) error {
-	c, err := a.con()
-	if err != nil {
-		return err
-	}
-	defer c.Close()
-
-	_, err = c.ExecContext(a.ctx, fmt.Sprintf("TRUNCATE `%s`", table))
-	return err
 }
 
 // NewMySQLAdapter sets up a new connection to the mysql database
@@ -52,6 +33,26 @@ func NewMySQLAdapter(ctx context.Context, details database.ConnectionDetails) (*
 	}
 
 	return &MySQLAdapter{db: db, ctx: ctx}, nil
+}
+
+// RunTableCommand implements database.Adapter.
+func (a *MySQLAdapter) RunTableCommand(table, command string) error {
+	switch command {
+	case MySQLRpcTruncate:
+		return a.exec(fmt.Sprintf("TRUNCATE `%s`", table))
+	case MySQLRpcDrop:
+		return a.exec(fmt.Sprintf("DROP TABLE `%s`", table))
+	}
+
+	return fmt.Errorf("Invalid table command '%s'", command)
+}
+
+// TableCommands implements database.Adapter.
+func (*MySQLAdapter) TableCommands() []string {
+	return []string{
+		MySQLRpcDrop,
+		MySQLRpcTruncate,
+	}
 }
 
 // SetContext sets the context instance that will be used for all queries
@@ -143,4 +144,16 @@ func (a *MySQLAdapter) con() (*sql.Conn, error) {
 	}
 
 	return c, nil
+}
+
+// exec executes a sql query that expects no results
+func (a *MySQLAdapter) exec(query string) error {
+	c, err := a.con()
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+
+	_, err = c.ExecContext(a.ctx, query)
+	return err
 }

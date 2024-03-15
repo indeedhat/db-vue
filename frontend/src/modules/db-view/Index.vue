@@ -44,6 +44,9 @@
             <notice v-if="store.activeTabCount == 0">Select a table on the left to continue</notice>
         </main>
     </section>
+    <confirm ref="confirmModal" title="Are you sure?">
+        Do you want to run this table command?
+    </confirm>
 </template>
 
 <script setup lang="ts">
@@ -63,6 +66,7 @@ import MenuItem from '@/modules/db-view/components/MenuItem.vue'
 import Tab from '@/components/tabs/Tab.vue'
 import TabContainer, { type TabContainerModel } from '@/components/tabs/TabContainer.vue'
 import Notice from '@/components/Notice.vue'
+import Confirm, { type ConfirmType } from '@/components/modal/Confirm.vue'
 
 const adapter = useDatabase()
 const globalStore = useGlobalStore()
@@ -72,12 +76,22 @@ const tabs = ref<TabContainerModel>()
 const tableCommands = ref<string[]>([])
 const contextTable = ref<string>("")
 const contextMenu = ref<ContextMenuType>()
+const confirmModal = ref<ConfirmType>()
 
 const openContext = (e: MouseEvent, table: string) => {
     contextTable.value = table
     contextMenu.value?.open(e.screenX, e.screenY)
 }
 const runTableCommand = async (command: string) => {
+    const outcome = await new Promise((accept) => {
+        confirmModal.value?.open(accept)
+    })
+
+    confirmModal.value?.close()
+    if (!outcome) {
+        return
+    }
+
     contextMenu.value?.close()
 
     await adapter.runTableCommand(contextTable.value, command)

@@ -11,9 +11,9 @@ an incredibly simplistic tool to run queries agains relational databases.
 - [x] run queries
 - [x] view results
 - [x] truncate table
-    - [ ] add confimation prompt
+    - [x] add confimation prompt
 - [x] drop table
-    - [ ] add confimation prompt
+    - [x] add confimation prompt
 
 - [x] table tabs
 - [x] schema tab sets

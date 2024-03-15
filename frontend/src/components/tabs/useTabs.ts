@@ -1,4 +1,3 @@
-import { Identifier } from '@babel/types'
 import { reactive, ref, readonly, InjectionKey, provide, inject, Ref, onUnmounted, computed, ComputedRef } from 'vue'
 
 export interface TabData {
@@ -7,30 +6,33 @@ export interface TabData {
 }
 
 const tabsInjectionKey = Symbol('tabs') as InjectionKey<{
-    register: (identifier: symbol, tabData: TabData) => void,
-    deregister: (identifier: symbol) => void
-    active: Readonly<Ref<symbol|undefined>>,
+    register: (identifier: string, tabData: TabData) => void,
+    deregister: (identifier: string) => void
+    active: Readonly<Ref<string|undefined>>,
 }>
+
+type ActivateCallback = (Identifier: string) => void
 
 
 interface UseTabs {
-    tabs: ReadonlyMap<symbol, TabData>
-    setActive: (identifier: symbol) => void
-    isActive: (identifier: symbol) => Boolean
-    deregister: (Identifier: symbol) => void
+    tabs: ReadonlyMap<string, TabData>
+    setActive: (identifier: string) => void
+    isActive: (identifier: string) => Boolean
+    deregister: (Identifier: string) => void
+    onActivate: (fn: ActivateCallback) => void
 }
 
 export const useTabs = (): UseTabs => {
-    const tabs = reactive(new Map<symbol, TabData>())
-
-    const active = ref<symbol>()
-    const register = (identifier: symbol, tabData: TabData) => {
+    let onActivateFn: ActivateCallback|undefined
+    const tabs = reactive(new Map<string, TabData>())
+    const active = ref<string>("")
+    const register = (identifier: string, tabData: TabData) => {
         tabs.set(identifier, tabData)
         if (tabs.size === 1) {
             setActive(identifier)
         }
     }
-    const deregister = (identifier: symbol) => {
+    const deregister = (identifier: string) => {
         const tab = tabs.get(identifier)
 
         const keys = [ ...Array.from(tabs.keys()) ]
@@ -53,24 +55,31 @@ export const useTabs = (): UseTabs => {
         active: readonly(active),
     })
 
-    const setActive = (identifier: symbol) => {
-    active.value = identifier
+    const setActive = (identifier: string) => {
+        active.value = identifier
+        if (onActivateFn) {
+            onActivateFn(identifier)
+        }
     }
-    const isActive = (identifier: symbol): Boolean => (
+    const isActive = (identifier: string): Boolean => ( 
         active.value === identifier
     )
+    const onActivate = (fn: ActivateCallback): void => {
+        onActivateFn = fn
+    }
 
     return {
         tabs: readonly(tabs),
         setActive,
         isActive,
-        deregister
+        deregister,
+        onActivate
     }
 }
 
 interface UseTab {
     isActive: ComputedRef<boolean>
-    deregister: (Identifier: symbol) => void
+    deregister: (Identifier: string) => void
 }
 
 export const useTab = (tabData: TabData): UseTab => {
@@ -80,14 +89,11 @@ export const useTab = (tabData: TabData): UseTab => {
     }
 
     const { register, deregister, active } = tabsInjection
-    const tabSymbol = Symbol(tabData.name)
+    const tabSymbol = tabData.name
     const isActive = computed(() => (active.value === tabSymbol))
 
     register(tabSymbol, tabData)
-    onUnmounted(() => {
-        console.log("unmount")
-        deregister(tabSymbol)
-    })
+    onUnmounted(() => deregister(tabSymbol))
 
     return {
         isActive,

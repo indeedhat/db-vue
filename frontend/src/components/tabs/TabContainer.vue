@@ -1,6 +1,8 @@
 <template>
     <section class="tab-container">
-        <ul class="tabs flex overflow-x-auto whitespace-nowrap dark:bg-neutral-800 border-b border-grey-300 dark:border-neutral-700">
+        <ul class="tabs flex overflow-x-auto whitespace-nowrap dark:bg-neutral-800 border-b border-grey-300 dark:border-neutral-700"
+            ref="ul"
+        >
             <li v-for="[identifier, tab] in tabs.entries()" 
                 :key="identifier" 
                 @click="setActive(identifier)"
@@ -9,6 +11,7 @@
                     ['border border-b-0 dark:bg-neutral-700']: isActive(identifier),
                     ['bg-transparent dark:text-white whitespace-nowrap cursor-base  hover:border-gray-400 dark:hover:border-gray-300']: !isActive(identifier),
                 }"
+                :data-id="identifier"
             >
                 {{ tab.name }}
                 <span v-if="isActive(identifier)"
@@ -24,7 +27,24 @@
 </template>
 
 <script lang="ts" setup>
+import { ref, watchEffect } from 'vue'
 import { useTabs } from './useTabs'
 
-const { tabs, setActive, isActive, deregister } = useTabs()
+const { tabs, setActive, isActive, deregister, onActivate } = useTabs()
+
+const ul = ref<HTMLElement>()
+onActivate((identifier: string) => {
+    const active = ul.value?.querySelector(`[data-id='${identifier}']`)
+    active?.scrollIntoView()
+})
+
+defineExpose({
+    setActive: (id: string) => {
+        setActive(id)
+    },
+})
+
+export interface TabContainerModel {
+    setActive: (identifier: string) => void
+}
 </script>

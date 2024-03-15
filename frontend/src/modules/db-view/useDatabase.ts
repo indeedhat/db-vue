@@ -47,7 +47,6 @@ const useDatabase = (): DatabaseAdapter  => {
 
     const query = async (query: string): Promise<database.Results> => {
         const r = await adapter.Query(query)
-        console.log({ r })
         return r
     }
 

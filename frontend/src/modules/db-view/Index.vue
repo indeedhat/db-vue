@@ -5,7 +5,10 @@
     <section id="layout" class="flex flex-grow overflow-hidden overscroll-contain text-neutral-700 dark:text-neutral-200">
         <aside class="flex flex-col dark:border-neutral-700 border-r dark:bg-neutral-800">
             <ul>
-                <menu-select :items="store.info.schemas" :active="store.activeSchema" :onSelect="(schema: string) => useDb(schema)" />
+                <menu-select :items="store.info.schemas" 
+                    :active="store.activeSchema" 
+                    :onSelect="(schema: string) => useDb(schema)" 
+                />
             </ul>
             <ul v-if="store.info.tables.length" class="flex-grow overflow-auto">
                 <menu-item  v-for="table in [...store.info.tables].sort()" :key="table" @click="openTab(table)">
@@ -15,8 +18,12 @@
             <div v-else>No Tables</div>
         </aside>
         <main class="flex-grow min-h-0 max-h-full overflow-y-auto">
-            <tab-container>
-                <tab v-for="(consoleState, tname) in store.activeSchemaState" :key="tname" :name="<string>tname" :onRemove="() => removeTab(<string>tname)">
+            <tab-container ref="tabs">
+                <tab v-for="(consoleState, tname) in store.activeSchemaState" 
+                    :key="tname" 
+                    :name="<string>tname" 
+                    :onRemove="() => removeTab(<string>tname)"
+                >
                     <console-page :state="consoleState"/>
                 </tab>
             </tab-container>
@@ -36,15 +43,23 @@ import ConsolePage from '@/modules/db-view/components/ConsolePage.vue'
 import MenuSelect from '@/modules/db-view/components/MenuSelect.vue'
 import MenuItem from '@/modules/db-view/components/MenuItem.vue'
 import Tab from '@/components/tabs/Tab.vue'
-import TabContainer from '@/components/tabs/TabContainer.vue'
+import TabContainer, { type TabContainerModel } from '@/components/tabs/TabContainer.vue'
 import Notice from '@/components/Notice.vue'
 
 const adapter = useDatabase()
 const globalStore = useGlobalStore()
 const store = useStore(globalStore.connection!.name)
 
+const tabs = ref<TabContainerModel>()
+
 const removeTab = (tab: string): void => store.removeTab(tab)
-const openTab = (tab: string): void => store.addTab(tab)
+const openTab = (tab: string): void => {
+    if (!store.hasTab(tab)) {
+        store.addTab(tab)
+    }
+
+    tabs.value?.setActive(tab)
+}
 const useDb = async (name: string): Promise<void> => {
     const inf = await adapter.useSchema(name)
     if (!inf) {
@@ -56,9 +71,7 @@ const useDb = async (name: string): Promise<void> => {
 
 onMounted(async (): Promise<any> => {
     // TODO: should probably to some kind of retry here
-    console.log("here")
     const schemas = await adapter.listSchemas()
-    console.log(schemas)
     if (!schemas.length) {
         return
     }

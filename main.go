@@ -19,7 +19,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:            "DB Vue",
+		Title:            "DB-Vue",
 		Width:            1024,
 		Height:           768,
 		WindowStartState: options.Normal,

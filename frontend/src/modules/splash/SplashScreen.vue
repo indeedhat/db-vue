@@ -98,19 +98,6 @@ const handleSubmit = () => {
 }
 
 const handleConnect = async (details: database.ConnectionDetails): Promise<void> => {
-    //await Connect(database.ConnectionDetails.createFrom({
-    //    type: details.type == database.ConnectionType.MySQL 
-    //        ? database.ConnectionType.MySQL 
-    //        : database.ConnectionType.Postgres,
-    //    name: details.name,
-    //    host: details.host,
-    //    port: details.port,
-    //    user: details.user,
-    //    pass: details.pass,
-    //}))
-    //console.log(details.type == database.ConnectionType.MySQL 
-    //        ? database.ConnectionType.MySQL 
-    //        : database.ConnectionType.Postgres, details.type)
     await Connect(details)
     globalStore.setConnection(details)
     router.push("/db")

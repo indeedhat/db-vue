@@ -58,6 +58,9 @@ const actualUseStore = defineStore('db-view', {
                 }
             }
         },
+        hasTab(tab: string) {
+            return !!this.activeSchemaState![tab]
+        },
         removeTab(tab: string) {
             if (!this.activeSchemaState![tab]) {
                 return

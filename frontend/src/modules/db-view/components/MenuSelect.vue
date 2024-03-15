@@ -38,7 +38,6 @@ const select = (i: number) => {
 
 const open: Ref<Boolean> = ref(false)
 const toggleOpen = (force: Boolean|null = null) => {
-    console.log(force, !open.value)
     open.value = force ?? !open.value
 }
 </script>

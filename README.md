@@ -38,4 +38,3 @@ an incredibly simplistic tool to run queries agains relational databases.
 
 ## Known issues
 - [ ] there is no feedback when running a query that does not have results (such as create table)
-- [ ] table context menu does not close when clicking off it

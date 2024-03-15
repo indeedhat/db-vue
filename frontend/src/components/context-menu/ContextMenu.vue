@@ -1,6 +1,6 @@
 <template>
     <div ref="self"
-        v-click-outside="onClose"
+        v-click-outside-element="close"
         v-if="open"
         :style="{ left: `${coords.x}px`, top: `${coords.y}px` }"
         class="dark:border-neutral-600 border-r dark:bg-neutral-700 min-w-[200px] fixed z-50"
@@ -13,8 +13,6 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-// @ts-ignore
-import vClickOutside from 'click-outside-vue3';
 
 const props = defineProps<{
     onClose?: () => void
@@ -28,18 +26,18 @@ export interface ContextMenuType {
     close: () => void
 }
 
+const close = (): void => {
+    console.log("close context")
+    open.value = false
+    props.onClose?.()
+}
+
 defineExpose({
     open: (x: number, y: number): void => {
         coords.value.x = x
         coords.value.y = y
         open.value = true
     },
-    close: (): void => {
-        console.log("close context")
-        open.value = false
-        if (props.onClose) {
-            props.onClose()
-        }
-    }
+    close
 })
 </script>

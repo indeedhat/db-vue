@@ -6,7 +6,11 @@
         <ul class="dark:border-neutral-600 border-r dark:bg-neutral-700 min-w-[200px] absolute top-0 left-[100%] z-50"
             v-if="open"
         >
-            <menu-item v-for="(item, index) in items" :key="index" @click.stop="select(index)" class="dark:border-neutral-600 dark:hover:bg-neutral-600 cursor-pointer">
+            <menu-item v-for="(item, index) in items" 
+                :key="index" 
+                @click.stop="select(index)" 
+                class="dark:border-neutral-600 dark:hover:bg-neutral-600 cursor-pointer"
+            >
                 {{ item }}
             </menu-item>
         </ul>
@@ -14,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PropType, Ref } from 'vue'
+import type { Ref } from 'vue'
 import { ref, onMounted } from 'vue'
 
 import MenuItem from '@/modules/db-view/components/MenuItem.vue'
@@ -31,9 +35,7 @@ const select = (i: number) => {
     selected.value = i
     toggleOpen()
 
-    if (props.onSelect) {
-        props.onSelect(props.items[i])
-    }
+    props.onSelect?.(props.items[i])
 }
 
 const open: Ref<Boolean> = ref(false)

@@ -11,8 +11,9 @@ an incredibly simplistic tool to run queries agains relational databases.
 - [x] run queries
 - [x] view results
 - [x] truncate table
-    - backend done
+    - [ ] add confimation prompt
 - [x] drop table
+    - [ ] add confimation prompt
 
 - [x] table tabs
 - [x] schema tab sets
@@ -25,7 +26,7 @@ an incredibly simplistic tool to run queries agains relational databases.
     - possible could instead allow for multiple connections to be open at a time
 
 - [ ] add new rows
-- [ ] view row as json
+- [x] view row as json
 - [ ] edit rows
 - [ ] drop rows
 

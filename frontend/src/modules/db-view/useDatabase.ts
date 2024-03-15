@@ -1,6 +1,7 @@
 import { useToast } from "../toast/useToast";
 import * as adapter from '../../../wailsjs/go/main/App'
 import { database } from '../../../wailsjs/go/models'
+import { type Dict } from '@/types'
 
 export interface DBInfo {
     schemas: string[]
@@ -15,6 +16,7 @@ interface DatabaseAdapter {
     tableCommands: () => Promise<string[]>
     runTableCommand: (table: string, command: string) => Promise<void>
     e: (value: any, type: database.ColumnType) => string
+    rowJson: (results: database.Results, row: number) => string
 }
 
 const useDatabase = (): DatabaseAdapter  => {
@@ -91,6 +93,16 @@ const useDatabase = (): DatabaseAdapter  => {
         return value
     }
 
+    const rowJson = (results: database.Results, row: number): string => {
+        const data: Dict<any> = {}
+
+        for (let i = 0; i < results.headers.length; i++) {
+            data[results.headers[i]] = e(results.rows[row][i], results.col_types[i])
+        }
+
+        return JSON.stringify(data, null, 4)
+    }
+
     return {
         listSchemas,
         useSchema,
@@ -98,7 +110,8 @@ const useDatabase = (): DatabaseAdapter  => {
         tableCommands,
         runTableCommand,
         refreshInfo,
-        e
+        e,
+        rowJson
     }
 };
 

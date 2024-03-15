@@ -1,6 +1,6 @@
 <template>
-    <header class="dark:border-neutral-700 border-b dark:bg-neutral-800">
-        <h1>DB Vue</h1>
+    <header class="dark:border-neutral-700 border-b dark:bg-neutral-800 p-4">
+        <page-title>DB Vue</page-title>
     </header>
     <section id="layout" class="flex flex-grow overflow-hidden overscroll-contain text-neutral-700 dark:text-neutral-200">
         <aside class="flex flex-col dark:border-neutral-700 border-r dark:bg-neutral-800">
@@ -21,7 +21,7 @@
             </ul>
             <div v-else>No Tables</div>
         </aside>
-        <main class="relative flex-grow min-h-0 max-h-full overflow-y-auto">
+        <main class="relative flex flex-col flex-grow min-h-0 max-h-full overflow-y-auto">
             <context-menu ref="contextMenu">
                 <context-item @click="openTab(contextTable)">Open</context-item>
                 <context-seperator />
@@ -53,6 +53,7 @@ import { useDatabase, type DBInfo } from './useDatabase'
 import { useStore } from './useStore'
 import { useGlobalStore } from '../useGlobalStore'
 
+import PageTitle from '@/components/Title.vue'
 import ContextMenu, { type ContextMenuType } from '@/components/context-menu/ContextMenu.vue'
 import ContextItem from '@/components/context-menu/ContextItem.vue'
 import ContextSeperator from '@/components/context-menu/ContextSeperator.vue'

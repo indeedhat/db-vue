@@ -1,5 +1,5 @@
 <template>
-    <div v-if="isActive">
+    <div v-if="isActive" class="flex flex-col flex-grow">
         <slot />
     </div>
 </template>

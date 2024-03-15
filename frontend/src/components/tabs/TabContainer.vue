@@ -1,5 +1,5 @@
 <template>
-    <section class="tab-container">
+    <section class="tab-container flex flex-col flex-grow">
         <ul class="tabs flex overflow-x-auto whitespace-nowrap dark:bg-neutral-800 border-b border-grey-300 dark:border-neutral-700"
             ref="ul"
         >
@@ -20,7 +20,7 @@
                 >x</span>
             </li>
         </ul>
-        <section class="active-tab">
+        <section class="active-tab flex flex-col flex-grow">
             <slot />
         </section>
     </section>

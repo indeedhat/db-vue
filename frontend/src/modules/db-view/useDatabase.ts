@@ -86,8 +86,21 @@ const useDatabase = (): DatabaseAdapter  => {
 
     const e = (value: any, type: database.ColumnType): string => {
         switch (type.scan_type) {
-            case 'NullString':
-                return value.String
+            case 'NullString': return value.String
+            case 'NullInt64': return value.Int64
+            case 'NullInt32': return value.Int32
+            case 'NullInt16': return value.Int16
+            case 'NullByte': return value.InByte
+            case 'NullFloat64': return value.Float64
+            case 'NullBool': return value.Bool
+            case 'NullTime': return value.Time
+        }
+
+        if (type.scan_type.startsWith("Null")) {
+            const k = type.scan_type.substring(4)
+            return "undefined" !== typeof value[k] 
+                ? value[k]
+                : value
         }
 
         return value

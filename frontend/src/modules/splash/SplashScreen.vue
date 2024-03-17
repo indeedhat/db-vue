@@ -1,10 +1,10 @@
 <template>
     <div class="p-4">
-        <std-button @click="() => showForm = true">Add Connection</std-button>
+        <std-button @click="openForm()">Add Connection</std-button>
     </div>
     <div v-if="showForm">
         <div id="form" class="grid gap-2">
-            <std-select v-model="formData.type" label="Database Type">
+            <std-select v-model="formData.type" label="Database Type" :disabled="formData.edit">
                 <option :value="database.ConnectionType.MySQL">
                     {{ database.ConnectionType.MySQL }}
                 </option>
@@ -12,7 +12,7 @@
                     {{ database.ConnectionType.Postgres }}
                 </option>
             </std-select>
-            <std-input label="name" v-model="formData.name" />
+            <std-input label="name" v-model="formData.name" :disabled="formData.edit"/>
             <std-input label="host" v-model="formData.host" />
             <std-input label="port" type="number" v-model="formData.port" />
             <std-input label="user" v-model="formData.user" />
@@ -27,9 +27,14 @@
         <connection-widget v-for="(con, i) in store.connections" 
             :key="i" 
             :details="con" 
-            @click="() => handleConnect(con)" 
+            @click.left="() => handleConnect(con)" 
+            @click.right.prevent="(e: MouseEvent) => openContext(e, con)" 
         />
     </div>
+    <context-menu ref="contextMenu">
+        <context-item @click="editConnection()">Edit</context-item>
+        <context-item @click="deleteConnection()">Delete</context-item>
+    </context-menu>
 </template>
 
 <script lang="ts" setup>
@@ -46,11 +51,17 @@ import ConnectionWidget from './components/ConnectionWidget.vue'
 import StdButton from '../../components/Button.vue'
 import StdInput from '../../components/form/Input.vue'
 import StdSelect from '../../components/form/Select.vue'
+import ContextMenu, { type ContextMenuType } from '@/components/context-menu/ContextMenu.vue'
+import ContextItem from '@/components/context-menu/ContextItem.vue'
 
 const router = useRouter()
 const toast = useToast()
+
+const contextConnection = ref<database.ConnectionDetails>()
+const contextMenu = ref<ContextMenuType>()
 const showForm = ref<Boolean>()
 const formData = ref({
+    edit: false,
     type: '',
     name: '',
     host: '',
@@ -58,6 +69,7 @@ const formData = ref({
     user: '',
     pass: ''
 })
+
 const store = useConnectionsStore()
 const globalStore = useGlobalStore()
 
@@ -71,7 +83,7 @@ const handleSubmit = () => {
     ) {
         toast.error("Fill out all the form fields")
         return
-    } else if (store.hasConnection(formData.value.name)) {
+    } else if (!formData.value.edit && store.hasConnection(formData.value.name)) {
         toast.error("name in use")
         return
     }
@@ -80,27 +92,58 @@ const handleSubmit = () => {
         type: formData.value.type,
         name: formData.value.name,
         host: formData.value.host,
-        port: formData.value.port,
+        port: ~~formData.value.port,
         user: formData.value.user,
         pass: formData.value.pass,
     }))
 
-    formData.value.type = ""
-    formData.value.name = ""
-    formData.value.host = ""
-    formData.value.port = 0
-    formData.value.user = ""
-    formData.value.pass = ""
-
     showForm.value = false
 
-    toast.success("Connection added")
+    toast.success(`Connection ${formData.value.edit ? 'updated' : 'added'}`)
 }
 
-const handleConnect = async (details: database.ConnectionDetails): Promise<void> => {
-    await Connect(details)
-    globalStore.setConnection(details)
+const openForm = (con: database.ConnectionDetails | null = null) => {
+    showForm.value = false
+
+    formData.value.edit = con !== null
+    formData.value.type =  ""
+    formData.value.name =  ""
+    formData.value.host =  ""
+    formData.value.port =  0
+    formData.value.user =  ""
+    formData.value.pass =  ""
+
+    setTimeout(() => {
+        if (con) {
+            formData.value.type = con.type
+            formData.value.name = con.name
+            formData.value.host = con.host
+            formData.value.port = con.port
+            formData.value.user = con.user
+            formData.value.pass = con.pass
+        }
+
+        showForm.value = true
+    }, 0)
+}
+
+const handleConnect = async (con: database.ConnectionDetails): Promise<void> => {
+    await Connect(con)
+    globalStore.setConnection(con)
     router.push("/db")
+}
+
+const openContext = (e: MouseEvent, con: database.ConnectionDetails) => {
+    contextConnection.value = con
+    contextMenu.value?.open(e.screenX, e.screenY)
+}
+const editConnection = () => {
+    contextMenu.value?.close()
+    openForm(contextConnection.value)
+}
+const deleteConnection = () => {
+    contextMenu.value?.close()
+    store.removeConnection(contextConnection.value!)
 }
 
 </script>

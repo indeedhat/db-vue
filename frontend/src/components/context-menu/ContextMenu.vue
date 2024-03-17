@@ -3,7 +3,7 @@
         v-click-outside-element="close"
         v-if="open"
         :style="{ left: `${coords.x}px`, top: `${coords.y}px` }"
-        class="dark:border-neutral-600 border-r dark:bg-neutral-700 min-w-[200px] fixed z-50"
+        class="dark:border-neutral-600 border-r dark:bg-neutral-700 min-w-[200px] fixed z-50 border-2 shadow-xl dark:border-neutral-500"
     >
     <ul>
         <slot />
